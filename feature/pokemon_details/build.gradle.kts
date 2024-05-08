@@ -1,24 +1,18 @@
 plugins {
-    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.androidLibrary)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ksp)
 }
 
 android {
-    namespace = "com.skid.pokeapp"
+    namespace = "com.skid.pokemon_details"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.skid.pokeapp"
         minSdk = 26
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -40,11 +34,6 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.10"
     }
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
 }
 
 dependencies {
@@ -59,28 +48,20 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.animation)
     implementation(libs.androidx.navigation)
+    implementation(libs.androidx.paging)
+    implementation(libs.androidx.paging.compose)
+    implementation(libs.coil)
 
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
     implementation(libs.dagger)
     ksp(libs.dagger.compiler)
 
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(project(":base:core"))
     implementation(project(":base:coreui"))
-    implementation(project(":base:network"))
     implementation(project(":base:utils"))
 
-    implementation(project(":api:pokemon_list_api"))
     implementation(project(":api:pokemon_details_api"))
-
-    implementation(project(":feature:pokemon_list"))
-    implementation(project(":feature:pokemon_details"))
 }
