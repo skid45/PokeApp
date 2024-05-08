@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="an_error_occurred_while_loading_a_new_page">An error occurred while loading a new page :(</string>
+    <string name="try_to_load_again">Try to load again</string>
+    <string name="error_please_check_the_connection">Error :( Please check the connection</string>
+    <string name="pokemons">Pokemons</string>
+</resources>
