@@ -9,8 +9,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import com.skid.core.app.LocalApplicationProvider
+import com.skid.core.navigation.di.getScreenEntry
 import com.skid.coreui.theme.PokeAppTheme
 import com.skid.pokeapp.app.PokeApp
+import com.skid.pokemon_list_api.PokemonListScreenEntry
 
 class MainActivity : ComponentActivity() {
 
@@ -25,7 +27,7 @@ class MainActivity : ComponentActivity() {
                         val screenEntriesMap = LocalApplicationProvider.current.screenEntriesMap
                         Navigation(
                             screenEntries = screenEntriesMap,
-                            startDestination = "" // TODO (should be start screen)
+                            startDestination = screenEntriesMap.getScreenEntry<PokemonListScreenEntry>().route
                         )
                     }
                 }
