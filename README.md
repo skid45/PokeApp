@@ -15,8 +15,8 @@
 
 Демонстрация стандартного флоу работы приложения (без ошибок):
 
-[norlmal_flow.mp4](preview%2Fnorlmal_flow.mp4)
+[normal_flow.webm](preview%2Fnormal_flow.webm)
 
 Демонстрация флоу с ошибками (при отсутствии интернета):
 
-[error_flow.mp4](preview%2Ferror_flow.mp4)
+[error_flow.webm](preview%2Ferror_flow.webm)
