@@ -10,4 +10,4 @@ import dagger.Module
         PokemonDetailsScreenEntryModule::class,
     ]
 )
-interface ScreenEntriesModule
+internal interface ScreenEntriesModule

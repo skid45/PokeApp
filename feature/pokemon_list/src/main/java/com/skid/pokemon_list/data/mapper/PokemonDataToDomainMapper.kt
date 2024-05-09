@@ -7,7 +7,7 @@ import com.skid.pokemon_list.domain.model.Pokemon
 import java.util.Locale
 import javax.inject.Inject
 
-class PokemonDataToDomainMapper
+internal class PokemonDataToDomainMapper
 @Inject constructor() {
 
     operator fun invoke(dto: PokemonDto) = Pokemon(

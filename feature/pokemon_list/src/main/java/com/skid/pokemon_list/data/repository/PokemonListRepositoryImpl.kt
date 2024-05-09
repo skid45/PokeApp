@@ -12,7 +12,7 @@ import javax.inject.Provider
 
 private const val PAGE_SIZE = 20
 
-class PokemonListRepositoryImpl
+internal class PokemonListRepositoryImpl
 @Inject constructor(
     private val pokemonListPagingSource: Provider<PokemonListPagingSource>,
 ) : PokemonListRepository {

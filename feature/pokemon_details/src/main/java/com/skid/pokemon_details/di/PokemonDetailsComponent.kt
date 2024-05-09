@@ -8,9 +8,9 @@ import dagger.Component
 
 @Component(
     dependencies = [ApplicationProvider::class],
-    modules = []
+    modules = [PokemonDetailsRepositoryModule::class]
 )
-interface PokemonDetailsComponent {
+internal interface PokemonDetailsComponent {
 
     companion object {
 
@@ -31,7 +31,7 @@ interface PokemonDetailsComponent {
 
         fun create(
             applicationProvider: ApplicationProvider,
-            @BindsInstance model: PokemonDetailsScreenModel
+            @BindsInstance model: PokemonDetailsScreenModel,
         ): PokemonDetailsComponent
     }
 }

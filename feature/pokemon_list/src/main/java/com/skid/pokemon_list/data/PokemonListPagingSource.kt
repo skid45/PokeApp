@@ -8,7 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class PokemonListPagingSource
+internal class PokemonListPagingSource
 @Inject constructor(
     private val pokemonListService: PokemonListService,
     private val pokemonDataToDomainMapper: PokemonDataToDomainMapper,

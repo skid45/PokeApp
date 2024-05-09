@@ -9,7 +9,7 @@ import dagger.Provides
 import retrofit2.Retrofit
 
 @Module
-interface PokemonListRepositoryModule {
+internal interface PokemonListRepositoryModule {
 
     companion object {
 

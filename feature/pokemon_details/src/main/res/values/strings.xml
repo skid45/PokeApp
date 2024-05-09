@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_can_t_load_detailed_information">Error :( Can\'t load detailed information</string>
+    <string name="height">Height: %1$s m</string>
+    <string name="weight">Weight: %1$s kg</string>
+    <string name="types">Types</string>
+    <string name="ability_item_mask">%1$s) %2$s</string>
+</resources>

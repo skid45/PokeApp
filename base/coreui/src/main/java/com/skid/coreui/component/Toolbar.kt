@@ -36,6 +36,7 @@ fun Toolbar(
                 IconButton(
                     modifier = Modifier.padding(Dimens.Medium),
                     painter = navigationIcon,
+                    iconTint = MaterialTheme.colorScheme.onBackground,
                     onClick = { onNavigationIconClick?.invoke() }
                 )
             }
