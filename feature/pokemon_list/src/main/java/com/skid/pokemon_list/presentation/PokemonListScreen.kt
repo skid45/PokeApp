@@ -1,5 +1,13 @@
+@file:OptIn(ExperimentalSharedTransitionApi::class)
+
 package com.skid.pokemon_list.presentation
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -32,6 +40,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.os.bundleOf
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import androidx.paging.LoadState
@@ -42,20 +51,27 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.skid.core.domain.PokemonType
 import com.skid.core.navigation.di.ScreenEntriesMap
-import com.skid.coreui.component.IconButton
+import com.skid.core.navigation.di.getScreenEntry
+import com.skid.core.navigation.utils.navigate
+import com.skid.coreui.component.ErrorWithReloadItem
 import com.skid.coreui.component.Toolbar
 import com.skid.coreui.theme.Dimens
 import com.skid.coreui.theme.PokeAppTheme
 import com.skid.coreui.utils.imageResId
+import com.skid.pokemon_details_api.PokemonDetailsScreenEntry
+import com.skid.pokemon_details_api.PokemonDetailsScreenModel
 import com.skid.pokemon_list.R
 import com.skid.pokemon_list.domain.model.Pokemon
 import kotlinx.coroutines.flow.flowOf
 import com.skid.coreui.R as coreUiR
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun PokemonListScreen(
+internal fun PokemonListScreen(
     navController: NavController,
     screenEntriesMap: ScreenEntriesMap,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     state: LazyPagingItems<Pokemon>,
 ) {
     Scaffold(
@@ -72,7 +88,7 @@ fun PokemonListScreen(
                         .wrapContentSize()
                 )
 
-                is LoadState.Error -> ErrorItem(
+                is LoadState.Error -> ErrorWithReloadItem(
                     modifier = Modifier.fillMaxSize(),
                     errorText = stringResource(R.string.error_please_check_the_connection),
                     onReloadClick = state::refresh
@@ -80,7 +96,21 @@ fun PokemonListScreen(
 
                 else -> PokemonList(
                     state = state,
-                    onItemClick = {} // TODO (navigate on pokemon details screen)
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    onItemClick = { pokemon ->
+                        val pokemonDetailsScreenEntry = screenEntriesMap.getScreenEntry<PokemonDetailsScreenEntry>()
+                        navController.navigate(
+                            route = pokemonDetailsScreenEntry.route,
+                            args = bundleOf(
+                                pokemonDetailsScreenEntry.pokemonDetailsScreenModelKey
+                                        to PokemonDetailsScreenModel(
+                                    name = pokemon.name,
+                                    imageUrl = pokemon.imageUrl
+                                )
+                            )
+                        )
+                    }
                 )
             }
         }
@@ -89,8 +119,10 @@ fun PokemonListScreen(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun PokemonList(
+private fun PokemonList(
     state: LazyPagingItems<Pokemon>,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     onItemClick: (Pokemon) -> Unit,
 ) {
     LazyColumn {
@@ -99,6 +131,8 @@ fun PokemonList(
                 PokemonItem(
                     modifier = Modifier.animateItemPlacement(),
                     pokemon = pokemon,
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedVisibilityScope = animatedVisibilityScope,
                     onClick = onItemClick
                 )
             }
@@ -118,7 +152,7 @@ fun PokemonList(
 
             is LoadState.Error -> {
                 item {
-                    ErrorItem(
+                    ErrorWithReloadItem(
                         errorText = stringResource(R.string.an_error_occurred_while_loading_a_new_page),
                         onReloadClick = state::retry
                     )
@@ -132,8 +166,10 @@ fun PokemonList(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun PokemonItem(
+private fun PokemonItem(
     pokemon: Pokemon,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier,
     showDivider: Boolean = true,
     onClick: (Pokemon) -> Unit,
@@ -145,13 +181,21 @@ fun PokemonItem(
             .padding(start = Dimens.Small, end = Dimens.Small, top = Dimens.Small)
     ) {
         Row {
-            AsyncImage(
-                modifier = Modifier.size(175.dp),
-                model = pokemon.imageUrl,
-                contentDescription = pokemon.name,
-                placeholder = painterResource(coreUiR.drawable.pokemon_placeholder),
-                error = painterResource(coreUiR.drawable.pokemon_placeholder),
-            )
+            with(sharedTransitionScope) {
+                AsyncImage(
+                    modifier = Modifier
+                        .size(175.dp)
+                        .sharedElement(
+                            state = rememberSharedContentState(key = pokemon.imageUrl),
+                            animatedVisibilityScope = animatedVisibilityScope,
+                            boundsTransform = { _, _ -> tween(durationMillis = 600) }
+                        ),
+                    model = pokemon.imageUrl,
+                    contentDescription = pokemon.name,
+                    placeholder = painterResource(coreUiR.drawable.pokemon_placeholder),
+                    error = painterResource(coreUiR.drawable.pokemon_placeholder),
+                )
+            }
             Column(
                 modifier = modifier
                     .fillMaxWidth()
@@ -183,94 +227,72 @@ fun PokemonItem(
     }
 }
 
-@Composable
-fun ErrorItem(
-    errorText: String,
-    modifier: Modifier = Modifier,
-    onReloadClick: () -> Unit,
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(Dimens.Small),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = errorText,
-            color = MaterialTheme.colorScheme.error
-        )
-        Text(
-            text = stringResource(R.string.try_to_load_again),
-            color = MaterialTheme.colorScheme.primary
-        )
-        Spacer(modifier = Modifier.height(Dimens.Small))
-        IconButton(
-            painter = painterResource(coreUiR.drawable.ic_reload),
-            iconTint = MaterialTheme.colorScheme.primary,
-            onClick = onReloadClick
-        )
-    }
-}
-
+@Suppress("UNUSED_EXPRESSION")
 @Preview(showBackground = true)
 @Composable
 private fun PokemonListScreenPreview() {
     PokeAppTheme {
-        PokemonListScreen(
-            navController = rememberNavController(),
-            screenEntriesMap = mapOf(),
-            state = flowOf(
-                PagingData.from(
-                    data = List(10) {
-                        Pokemon(
-                            id = it,
-                            name = "Mew$it",
-                            imageUrl = "",
-                            types = PokemonType.entries
-                                .take(it + 1)
-                                .map(PokemonType::imageResId)
+        SharedTransitionLayout {
+            AnimatedContent(null, label = "") {
+                it
+                PokemonListScreen(
+                    navController = rememberNavController(),
+                    screenEntriesMap = mapOf(),
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    animatedVisibilityScope = this@AnimatedContent,
+                    state = flowOf(
+                        PagingData.from(
+                            data = List(10) {
+                                Pokemon(
+                                    id = it,
+                                    name = "Mew$it",
+                                    imageUrl = "",
+                                    types = PokemonType.entries
+                                        .take(it + 1)
+                                        .map(PokemonType::imageResId)
+                                )
+                            },
+                            sourceLoadStates = LoadStates(
+                                refresh = LoadState.NotLoading(false),
+                                prepend = LoadState.NotLoading(false),
+                                append = LoadState.NotLoading(false)
+                            )
                         )
-                    },
-                    sourceLoadStates = LoadStates(
-                        refresh = LoadState.NotLoading(false),
-                        prepend = LoadState.NotLoading(false),
-                        append = LoadState.NotLoading(false)
-                    )
+                    ).collectAsLazyPagingItems(),
                 )
-            ).collectAsLazyPagingItems(),
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PokemonItemPreview() {
-    PokeAppTheme {
-        PokemonItem(
-            pokemon = Pokemon(
-                id = 1,
-                name = "Mewtwo",
-                imageUrl = "",
-                types = listOf(
-                    PokemonType.DRAGON.imageResId,
-                    PokemonType.FLYING.imageResId,
-                    PokemonType.FLYING.imageResId,
-                    PokemonType.FLYING.imageResId,
-                    PokemonType.UNKNOWN.imageResId,
-                    PokemonType.STEEL.imageResId,
-                )
-            )
-        ) {
-
+            }
         }
     }
 }
 
+@Suppress("UNUSED_EXPRESSION")
 @Preview(showBackground = true)
 @Composable
-private fun ErrorItemPreview() {
+private fun PokemonItemPreview() {
     PokeAppTheme {
-        ErrorItem(stringResource(R.string.an_error_occurred_while_loading_a_new_page)) {}
+        SharedTransitionLayout {
+            AnimatedContent(null, label = "") {
+                it
+                PokemonItem(
+                    pokemon = Pokemon(
+                        id = 1,
+                        name = "Mewtwo",
+                        imageUrl = "",
+                        types = listOf(
+                            PokemonType.DRAGON.imageResId,
+                            PokemonType.FLYING.imageResId,
+                            PokemonType.FLYING.imageResId,
+                            PokemonType.FLYING.imageResId,
+                            PokemonType.UNKNOWN.imageResId,
+                            PokemonType.STEEL.imageResId,
+                        )
+                    ),
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    animatedVisibilityScope = this@AnimatedContent
+                ) {
+
+                }
+            }
+        }
     }
 }

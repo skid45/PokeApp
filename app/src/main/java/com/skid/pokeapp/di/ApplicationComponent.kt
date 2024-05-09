@@ -19,7 +19,7 @@ import javax.inject.Singleton
         ScreenEntriesModule::class,
     ]
 )
-interface ApplicationComponent : ApplicationProvider {
+internal interface ApplicationComponent : ApplicationProvider {
 
     companion object {
 

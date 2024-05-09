@@ -6,7 +6,7 @@ import androidx.paging.cachedIn
 import com.skid.pokemon_list.domain.repository.PokemonListRepository
 import javax.inject.Inject
 
-class PokemonListViewModel
+internal class PokemonListViewModel
 @Inject constructor(
     pokemonListRepository: PokemonListRepository,
 ) : ViewModel() {

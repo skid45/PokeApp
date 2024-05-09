@@ -14,7 +14,7 @@ import com.skid.coreui.theme.PokeAppTheme
 import com.skid.pokeapp.app.PokeApp
 import com.skid.pokemon_list_api.PokemonListScreenEntry
 
-class MainActivity : ComponentActivity() {
+internal class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

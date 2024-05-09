@@ -79,6 +79,8 @@ dependencies {
     implementation(project(":base:utils"))
 
     implementation(project(":api:pokemon_list_api"))
+    implementation(project(":api:pokemon_details_api"))
 
     implementation(project(":feature:pokemon_list"))
+    implementation(project(":feature:pokemon_details"))
 }

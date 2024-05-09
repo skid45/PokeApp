@@ -8,7 +8,7 @@ import dagger.Component
     dependencies = [ApplicationProvider::class],
     modules = [PokemonListRepositoryModule::class],
 )
-interface PokemonListComponent {
+internal interface PokemonListComponent {
 
     companion object {
 

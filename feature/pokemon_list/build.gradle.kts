@@ -63,4 +63,5 @@ dependencies {
     implementation(project(":base:coreui"))
 
     implementation(project(":api:pokemon_list_api"))
+    implementation(project(":api:pokemon_details_api"))
 }

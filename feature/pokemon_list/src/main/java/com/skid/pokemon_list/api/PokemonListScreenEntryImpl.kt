@@ -1,5 +1,8 @@
 package com.skid.pokemon_list.api
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
@@ -15,11 +18,14 @@ import javax.inject.Inject
 class PokemonListScreenEntryImpl
 @Inject constructor() : PokemonListScreenEntry() {
 
+    @OptIn(ExperimentalSharedTransitionApi::class)
     @Composable
     override fun Composable(
         navController: NavController,
         screens: ScreenEntriesMap,
         backStackEntry: NavBackStackEntry,
+        sharedTransitionScope: SharedTransitionScope,
+        animatedVisibilityScope: AnimatedVisibilityScope,
     ) {
         val applicationProvider = LocalApplicationProvider.current
         val viewModel = injectedViewModel {
@@ -32,6 +38,8 @@ class PokemonListScreenEntryImpl
             navController = navController,
             screenEntriesMap = screens,
             state = state,
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = animatedVisibilityScope
         )
     }
 }
